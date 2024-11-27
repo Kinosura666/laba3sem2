@@ -10,24 +10,27 @@ namespace laba3sem2
     public class TargetArray
     {
         public int length { get; private set; }
-        private List<int> dynamiclist;
+        private List<int> dynamiclist { get; set; }
 
         ////////////////// Constructor ////////////////// 
         public TargetArray(int length)
         {
+            Console.WriteLine($"Dynamic list created");
             this.length = length; 
             dynamiclist = new List<int>(length);
         }
 
         ////////////////// Destructor ////////////////// 
-        ~TargetArray()
+        public void Dispose()
         {
-            Console.WriteLine("Object destroyed");
+            Console.WriteLine("\nObject disposed\n");
             dynamiclist = null; 
+            GC.SuppressFinalize(this);
         }
 
         public void FillRandom()
         {
+            Console.WriteLine("\nArray filled with random numbers");
             var random = new Random();
             dynamiclist.Clear(); 
             for (int i = 0; i < length; i++)
@@ -43,6 +46,7 @@ namespace laba3sem2
 
         public void Shuffler()
         {
+            Console.WriteLine("\nArray shuffled");
             var rand = new Random();
             for (int i = length - 1; i > 0; i--)
             {
@@ -75,10 +79,24 @@ namespace laba3sem2
         ////////////////// LOAD FROM JSON ////////////////// 
         public static TargetArray LoadFromJson(string filePath)
         {
+            Console.WriteLine("\nLoaded data from json file:");
             string json = File.ReadAllText(filePath);
-            var obj = JsonConvert.DeserializeObject<TargetArray>(json);
+            var data = JsonConvert.DeserializeObject<dynamic>(json);
+
+            int length = (int)data.length;
+
+            List<int> dynamicList = ((Newtonsoft.Json.Linq.JArray)data.dynamiclist).Select(x => (int)x).ToList();
+
+            TargetArray loadedArray = new TargetArray(length)
+            {
+                dynamiclist = dynamicList 
+            };
+
+            Console.WriteLine("\nObject loaded from JSON:");
             Console.WriteLine(json);
-            return obj;
+
+            return loadedArray;
         }
+
     }
 }
